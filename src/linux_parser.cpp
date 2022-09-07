@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <experimental/filesystem>
 
 #include "linux_parser.h"
 
@@ -10,6 +11,9 @@ using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+
+namespace fs = std::experimental::filesystem;
+
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -48,30 +52,58 @@ string LinuxParser::Kernel() {
 }
 
 // BONUS: Update this to use std::filesystem
-vector<int> LinuxParser::Pids() {
+// vector<int> LinuxParser::Pids() {
+//   vector<int> pids;
+//   DIR* directory = opendir(kProcDirectory.c_str());
+//   struct dirent* file;
+//   while ((file = readdir(directory)) != nullptr) {
+//     // Is this a directory?
+//     if (file->d_type == DT_DIR) {
+//       // Is every character of the name a digit?
+//       string filename(file->d_name);
+//       if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+//         int pid = stoi(filename);
+//         pids.push_back(pid);
+//       }
+//     }
+//   }
+//   closedir(directory);
+//   return pids;
+// }
+
+vector<int> LinuxParser::Pids() 
+{
   vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
-    // Is this a directory?
-    if (file->d_type == DT_DIR) {
+  for (auto & dir_item : fs::directory_iterator(fs::path(kProcDirectory)))
+    if (fs::is_directory(dir_item)){
       // Is every character of the name a digit?
-      string filename(file->d_name);
-      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+      string filename(dir_item.path().filename().c_str());
+      if (std::all_of(filename.begin(), filename.end(), isdigit)) 
+      {
         int pid = stoi(filename);
         pids.push_back(pid);
       }
     }
-  }
-  closedir(directory);
   return pids;
 }
+
 
 // TODO: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() { return 0.0; }
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() 
+{ 
+  long uptime = 0;
+  string line;
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    linestream >> uptime;
+  }
+  return uptime; 
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
