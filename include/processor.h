@@ -5,13 +5,13 @@
 
 class Processor {
  public:
-  float Utilization();  // Done: See src/processor.cpp
+  Processor() : idle_(0), active_(0) {}
+  float Utilization();  // DONE: See src/processor.cpp
 
-  // Done: Declare any necessary private members
+  // DONE: Declare any necessary private members
  private:
-    std::vector<long> jiffies_;
-    long idle_ = 0;
-    long active_ = 0;
+    long idle_;
+    long active_;
 };
 
 #endif

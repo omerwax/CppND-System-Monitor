@@ -23,7 +23,7 @@ class System {
  private:
   std::string os_;
   std::string kernel_;
-  Processor cpu_ = {};
+  Processor cpu_;
   std::vector<Process> processes_ = {};
 };
 

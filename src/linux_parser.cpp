@@ -53,7 +53,7 @@ string LinuxParser::Kernel() {
   return kernel;
 }
 
-// Done : BONUS: Update this to use std::filesystem
+// DONE : BONUS: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() 
 {
   vector<int> pids;
@@ -71,13 +71,36 @@ vector<int> LinuxParser::Pids()
 }
 
 
-// TODO: Read and return the system memory utilization
+// DONE: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization()
 {
-  return 0.0; 
+  string line;
+  string key;
+  float mem_total;
+  float mem_free;
+   
+  std::ifstream filestream(kProcDirectory + kMeminfoFilename);
+  if (filestream.is_open()) {
+    
+    // Read the first line (with MemTotal)
+    std::getline(filestream, line);
+    std::istringstream linestream(line);
+    linestream >> key >> mem_total;
+    
+    // Read the next line (MemFree)
+    std::getline(filestream, line);
+    linestream.str(line);
+    
+    linestream >> key >> mem_free;
+       
+    return (mem_total - mem_free) / mem_total;
+    
+  }
+
+  return 0;
 }
 
-// Done: Read and return the system uptime
+// DONE: Read and return the system uptime
 long LinuxParser::UpTime() 
 { 
   long uptime = 0;
@@ -91,7 +114,7 @@ long LinuxParser::UpTime()
   return uptime; 
 }
 
-// TODO: Read and return the number of jiffies for the system
+// DONE: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() 
 {
    // create a jiffies vector
@@ -109,10 +132,52 @@ long LinuxParser::Jiffies()
 
 }
 
-// TODO: Read and return the number of active jiffies for a PID
-long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
+// DONE: Read and return the number of active jiffies for a PID
+long LinuxParser::ActiveJiffies(int pid){ 
+  string line;
+  string temp_s;
+  long temp;
+  long jiffies = 0;
 
-// Done: Read and return the number of active jiffies for the system
+  // open the /proc/pid/stat file for reading
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
+  if (filestream.is_open()) {
+    // Stat is a single line. read it
+    std::getline(filestream, line);
+    std::istringstream linestream(line);
+    
+    // go through the process /stat and count relevant jiffies
+    for (auto i = 1; i <= kProcessUpTime; i++) 
+    {
+      switch (i)
+      {
+      case kProcessCpuUtime:
+        linestream >> temp;
+        jiffies += temp;
+        break;
+      case kProcessCpuStime:
+        linestream >> temp;
+        jiffies += temp;
+        break;
+      case kProcessCpuCUtime:
+        linestream >> temp;
+        jiffies += temp;
+        break;
+      case kProcessCpuCStime:
+        linestream >> temp;
+        jiffies += temp;
+        break;
+      default:
+        linestream >> temp_s;
+        break;
+      }
+    } // for
+  }// if 
+  
+  return jiffies; 
+}
+
+// DONE: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() 
 {
   // create a jiffies vector
@@ -127,7 +192,7 @@ long LinuxParser::ActiveJiffies()
   
 }
 
-// Done: Read and return the number of idle jiffies for the system
+// DONE: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies()
 { 
   // create a jiffies vector
@@ -142,10 +207,14 @@ long LinuxParser::IdleJiffies()
 }
 
 
+// This function is not needed to acheive the required functionality 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization()
+{
+  return {}; 
+}
 
-// Done: Read and return the total number of processes
+// DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses()
 {
   
@@ -170,7 +239,7 @@ int LinuxParser::TotalProcesses()
   return int();
 }
 
-// TODO: Read and return the number of running processes
+// DONE: Read and return the number of running processes
 int LinuxParser::RunningProcesses()
 {
   string line;
@@ -194,7 +263,7 @@ int LinuxParser::RunningProcesses()
   return int();
 }
 
-// Done: Read and return the command associated with a process
+// DONE: Read and return the command associated with a process
 string LinuxParser::Command(int pid) 
 { 
   string command;
@@ -206,7 +275,7 @@ string LinuxParser::Command(int pid)
   return command; 
 }
 
-// Done: Read and return the memory used by a process
+// DONE: Read and return the memory used by a process
 string LinuxParser::Ram(int pid)
 {
   string line;
@@ -231,7 +300,7 @@ string LinuxParser::Ram(int pid)
   return string();
 }
 
-// Done: Read and return the user ID associated with a process
+// DONE: Read and return the user ID associated with a process
 string LinuxParser::Uid(int pid)
 {
   
@@ -255,7 +324,7 @@ string LinuxParser::Uid(int pid)
 }  
 
 
-// Done: Read and return the user associated with a process
+// DONE: Read and return the user associated with a process
 string LinuxParser::User(std::string uid)
 {
   if (uid.empty())
@@ -282,7 +351,7 @@ string LinuxParser::User(std::string uid)
   return user;
 }
 
-// Done: Read and return the uptime of a process
+// DONE: Read and return the uptime of a process
 long LinuxParser::UpTime(int pid)
 {
   string line;
@@ -313,48 +382,6 @@ long LinuxParser::UpTime(int pid)
   return uptime;
 
 }
-
-// Returns the cpu time values of for a process 
-void LinuxParser::CpuUtilization(int pid, ProcessCpuTime &time)
-{
-  
-  string line;
-  string temp;
-
-  // open the /proc/pid/stat file for reading
-  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
-  if (filestream.is_open()) {
-    // Stat is a single line. read it
-    std::getline(filestream, line);
-    std::istringstream linestream(line);
-    
-    // go through the process /stat and store relevant time variables
-    for (auto i = 1; i <= kProcessUpTime; i++) 
-    {
-      switch (i)
-      {
-      case kProcessCpuUtime:
-        linestream >> time.u_time;
-        break;
-      case kProcessCpuStime:
-        linestream >> time.s_time;
-        break;
-      case kProcessCpuCUtime:
-        linestream >> time.cu_time;
-        break;
-      case kProcessCpuCStime:
-        linestream >> time.cs_time;
-        break;
-      case kProcessUpTime:
-        linestream >> time.st_time;
-        break;
-      default:
-        linestream >> temp;
-        break;
-      }
-    } // for
-  } // if
-}// function
 
 // Read all the jiffies and store them in  a vector of jiffies (long)
 void LinuxParser::UpdateJiffies(std::vector<long> &jiffies)

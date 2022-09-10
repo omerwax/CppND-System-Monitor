@@ -1,7 +1,7 @@
 #include "processor.h"
 #include "linux_parser.h"
 
-// Done: Return the aggregate CPU utilization
+// DONE: Return the aggregate CPU utilization
 float Processor::Utilization() { 
     
     // get the current jiffies status

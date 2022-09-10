@@ -54,22 +54,13 @@ long ActiveJiffies();
 long ActiveJiffies(int pid);
 long IdleJiffies();
 void UpdateJiffies(std::vector<long> &jiffies);
-// Processes
-struct ProcessCpuTime
-{
-  long u_time = 0;  // User mode cpu time   
-  long s_time = 0;
-  long cu_time = 0;
-  long cs_time = 0;
-  long st_time = 0;
-};
 
+// Processes
 std::string Command(int pid);
 std::string Ram(int pid);
 std::string Uid(int pid);
 std::string User(std::string uid);
 long int UpTime(int pid);
-void CpuUtilization(int pid, ProcessCpuTime &time);
 
 };  // namespace LinuxParser
 
