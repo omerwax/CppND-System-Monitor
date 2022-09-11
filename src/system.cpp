@@ -54,7 +54,7 @@ std::string System::Kernel()
 }
 
 // DONE: Return the system's memory utilization
-float System::MemoryUtilization() { LinuxParser::MemoryUtilization(); }
+float System::MemoryUtilization() { return LinuxParser::MemoryUtilization(); }
 
 // DONE: Return the operating system name
 std::string System::OperatingSystem() 
