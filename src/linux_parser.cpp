@@ -36,6 +36,7 @@ string LinuxParser::OperatingSystem() {
         }
       }
     }
+    filestream.close();
   }
   return value;
 }
@@ -49,6 +50,7 @@ string LinuxParser::Kernel() {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> os >> version >> kernel;
+    stream.close();
   }
   return kernel;
 }
@@ -94,6 +96,8 @@ float LinuxParser::MemoryUtilization()
     linestream >> key >> mem_free;
        
     return (mem_total - mem_free) / mem_total;
+
+    filestream.close();
     
   }
 
@@ -110,6 +114,7 @@ long LinuxParser::UpTime()
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> uptime;
+    stream.close();
   }
   return uptime; 
 }
@@ -172,6 +177,8 @@ long LinuxParser::ActiveJiffies(int pid){
         break;
       }
     } // for
+
+    filestream.close();
   }// if 
   
   return jiffies; 
@@ -206,14 +213,6 @@ long LinuxParser::IdleJiffies()
   
 }
 
-
-// This function is not needed to acheive the required functionality 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization()
-{
-  return {}; 
-}
-
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses()
 {
@@ -235,6 +234,7 @@ int LinuxParser::TotalProcesses()
         }
       }
     }
+    filestream.close();
   }
   return int();
 }
@@ -259,6 +259,7 @@ int LinuxParser::RunningProcesses()
         }
       }
     }
+    filestream.close();
   }
   return int();
 }
@@ -271,6 +272,7 @@ string LinuxParser::Command(int pid)
   std::ifstream stream(kProcDirectory + std::to_string(pid) + kCmdlineFilename);
   if (stream.is_open()) {
     std::getline(stream, command);
+    stream.close();
   }
   return command; 
 }
@@ -289,13 +291,16 @@ string LinuxParser::Ram(int pid)
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
       while (linestream >> key) {
-        if (key == "VmSize:") {
+        // Original instructions on the project page were to us VmSize which includes all mapped virtual memeory of a process
+        // including disk space and etc. VmRSS displays only RAM used by a process which is more friendly and meaningful to users
+        if (key == "VmRSS:") {
           linestream >> ram;
           ram /= 1024; // convert KBytes to MBytes  
           return to_string(ram);
         }
       }
     }
+    filestream.close();
   }
   return string();
 }
@@ -319,6 +324,7 @@ string LinuxParser::Uid(int pid)
         }
       }
     }
+    filestream.close();
   }
   return val;
 }  
@@ -347,6 +353,7 @@ string LinuxParser::User(std::string uid)
         }
       }
     }
+    filestream.close();
   }
   return user;
 }
@@ -376,6 +383,8 @@ long LinuxParser::UpTime(int pid)
 
     // Process up time is relative to system start-time, substract it from system up to time to get absolute value
     uptime = LinuxParser::UpTime() - uptime; 
+
+    filestream.close();
      
   }
 
@@ -404,6 +413,8 @@ void LinuxParser::UpdateJiffies(std::vector<long> &jiffies)
     // go through the process /stat and store all jiffies
     for (auto i = 0; i < kGuest_; i++)
       linestream >> jiffies[i];
+
+    filestream.close();  
        
   } // if
 }

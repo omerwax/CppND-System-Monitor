@@ -33,10 +33,7 @@ vector<Process>& System::Processes()
 
     // Populate the processes vector
     for (auto &pid : pids)
-    {
-        Process proc(pid);
-        processes_.emplace_back(proc);
-    }
+        processes_.emplace_back(pid);
      
     // sort the processes by their cpu utilzation
     std::sort(processes_.begin(), processes_.end());

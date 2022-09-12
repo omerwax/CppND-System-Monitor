@@ -71,10 +71,4 @@ string Process::User()
 long int Process::UpTime() { return LinuxParser::UpTime(this->pid_); }
 
 // DONE: Overload the "less than" comparison operator for Process objects
-bool Process::operator<(Process const& a) const 
-{ 
-    if (a.Utilization() < this->Utilization())
-        return true; 
-    else
-        return false;
-}
+bool Process::operator<(Process const& a) const { return a.Utilization() < this->Utilization(); }
